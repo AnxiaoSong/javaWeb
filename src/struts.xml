@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+    "http://struts.apache.org/dtds/struts-2.5.dtd">
+<struts>
+
+
+
+	<package name="default" extends="struts-default">
+
+		<!-- 定义权限 拦截器 -->
+		<interceptors>
+			<interceptor name="login_required" class="interceptor.LoginRequired"></interceptor>
+		</interceptors>
+		<!-- 定义登录动作 -->
+		<action name="login" class="action.Login">
+			<result name="fail">/index.jsp</result>
+			<result name="success">/index.jsp</result>
+		</action>
+		<!-- 定义退出动作 -->
+		<action name="login_out" class="action.Login" method="loginOut">
+			<interceptor-ref name="login_required"></interceptor-ref>
+			<result name="no_login">/index.action</result>
+			<result name="success">/index.action</result>
+			<result name="fail">/index.action</result>
+		</action>
+
+		<!-- 定义注册界面 -->
+		<action name="add_user" class="user.action.DoUserInfo" method="add">
+			<result name="success">/index.action</result> <!-- 返回原先游览的url -->
+			<result name="fail">/index.action</result>  <!-- 返回 原先游览的url -->
+		</action>
+		<!-- 定义 显示当前用户信息 -->
+		<action name="show_currentUserInfo" class="user.action.DoUserInfo"
+			method="showCurrentUserInfo">
+			<interceptor-ref name="login_required"></interceptor-ref>
+			<result name="success">/user/userInfo.jsp</result>
+			<result name="no_login">/index.action</result>
+		</action>
+
+		<!-- 定义 首页 动作 -->
+		<action name="index" class="action.DoPost" method="show">
+			<result>/index.jsp</result>
+		</action>
+		<!-- 定义 用户 管理 -->
+		<action name="*_user_info" class="user.action.DoUserInfo"
+			method="{1}">
+			<interceptor-ref name="login_required"></interceptor-ref>
+			<result name="success" type="chain">
+            <param name="actionName">show_currentUserInfo</param>
+            </result>
+			<result name="fail" type="chain">
+			<param name="actionName">show_currentUserInfo</param>
+			</result>
+			<result name="no_login">/index.action</result>
+			<allowed-methods>del,update</allowed-methods>
+		
+		</action>
+
+		
+	 
+		
+		<!-- 用于其他用户游览者作者 -->
+		<action name="show_userInfo" class="user.action.DoUserInfo"
+			method="showUserInfo">
+			<result name="success">/user/show_author.jsp</result>
+			<result name="fail">/index.action</result>
+		</action>
+
+		<!-- 定义 评论管理 -->
+		<action name="del_Comment" class="user.action.DoComment"
+			method="del">
+			<interceptor-ref name="login_required"></interceptor-ref>
+			<result name="success"></result>
+			<result name="fail"></result>
+			<result name="no_login">/index.jsp</result>
+
+		</action>
+		<action name="add_Comment" class="user.action.DoComment"
+			method="add">
+		    <result name="success" type="chain">
+			<param name="actionName">show_arctle</param>
+			<param name="arctle_id">${comment.arctle_id}</param>
+            </result>
+			<result name="fail" type="chain">
+			<param name="actionName">show_arctle</param>
+			<param name="arctle_id">${comment.arctle_id}</param>
+			</result>
+			<result name="input">/index.action</result>
+		</action>
+		<!-- 文章管理 -->
+		<action name="update_arctle" class="user.action.DoArctle" method="update">
+			<interceptor-ref name="login_required"></interceptor-ref>
+			<result name="success">/user/edite/edite_article.jsp</result>
+			<result name="fail">index.jsp</result>
+			<result name="no_login">/index.jsp</result>
+		</action>
+		<action name="del_arctle" class="user.action.DoArctle" method="del">
+			<interceptor-ref name="login_required"></interceptor-ref>
+			<result name="success" type="chain">
+            <param name="actionName">show_currentUserInfo</param>
+            </result>
+		     <result name="fail" type="chain">
+			<param name="actionName">show_currentUserInfo</param>
+			</result>
+			<result name="no_login">/index.action</result>
+	
+		</action>
+		
+		<action name="add_arctle" class="user.action.DoArctle" method="add">
+			<interceptor-ref name="login_required"></interceptor-ref>
+				<result name="success" type="chain">
+			<param name="actionName">show_currentUserInfo</param>
+            </result>
+			<result name="fail">index.jsp</result>
+			<result name="no_login">/index.jsp</result>
+		</action>
+		
+		<action name="write_arctle" class="user.action.DoArctle"
+			method="writeArctle">
+			<interceptor-ref name="login_required"></interceptor-ref>
+			<result name="success">/user/edite/edite_article.jsp</result>
+			<result name="no_login">/index.jsp</result>
+		</action>
+		<!-- 可以匿名查看 文章 -->
+		<action name="show_arctle" class="user.action.DoArctle" method="showArctle">
+			<result name="success">/user/edite/show_actile.jsp</result>
+			<result name="fail">/include.jsp</result>
+		</action>
+		<!-- 定义消息管理 -->
+		<action name="*_message" class="user.action.DoMessage" method="{1}">
+			<interceptor-ref name="login_required"></interceptor-ref>
+          <result name="success" type="chain">
+			<param name="actionName">show_message</param>
+            </result>
+			<result name="fail">/user/message.jsp</result>
+			<result name="no_login">/index.jsp</result>
+			<allowed-methods>del,update</allowed-methods>
+		</action>
+        <action name="show_message" class="user.action.DoMessage" method="show">
+			<interceptor-ref name="login_required"></interceptor-ref>
+          <result name="success">
+			/user/message.jsp</result>
+			<result name="fail">/user/message.jsp</result>
+			<result name="no_login">/index.jsp</result>
+			
+		</action>
+		<!-- 定以关注管理 -->
+		<action name="*_fullow" class="user.action.DoFullow" method="{1}">
+			<interceptor-ref name="login_required"></interceptor-ref>
+	        <result name="success" type="chain">
+			<param name="actionName">show_fullow</param>
+            </result>
+			<result name="fail">/user/fullow.jsp</result>
+			<result name="no_login">/index.jsp</result>
+			<allowed-methods>del,update</allowed-methods>
+		</action>
+		<action name="show_fullow" class="user.action.DoFullow" method="show">
+			<interceptor-ref name="login_required"></interceptor-ref>
+			<result name="success">/user/fullow.jsp</result>
+			<result name="fail">/user/fullow.jsp</result>
+			<result name="no_login">/index.jsp</result>
+		</action>
+		
+		<action name="add_fullow" class="user.action.DoFullow" method="add">
+			<interceptor-ref name="login_required"></interceptor-ref>
+				<result name="success" type="chain">
+			<param name="actionName">show_arctle</param>
+            </result>
+			<result name="fail" type="chain">
+			<param name="actionName">show_arctle</param>
+			</result>
+			<result name="no_login">/index.action</result>
+		</action>
+		
+ <action name="update_post" class="action.DoPost" method="update">
+		<interceptor-ref name="login_required"></interceptor-ref>
+		<result name="success" type="chain">
+            <param name="actionName">show_currentUserInfo</param>
+            </result>
+		<result name="fail" type="chain">
+			<param name="actionName">show_currentUserInfo</param>
+			</result>
+			<result name="no_login">/index.jsp</result>
+	
+		
+		</action>
+        
+	</package>
+
+
+</struts>
